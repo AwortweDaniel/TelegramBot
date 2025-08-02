@@ -12,7 +12,7 @@ load_dotenv(dotenv_path=".env.local")
 
 TOKEN = os.getenv("BOT_TOKEN")
 
-# Supported operators and functions
+# Supported operators & functions
 OPERATORS = {
     ast.Add: operator.add,
     ast.Sub: operator.sub,
@@ -23,7 +23,7 @@ OPERATORS = {
     ast.USub: operator.neg,
 }
 
-# Allowed math functions
+# math functions
 ALLOWED_FUNCTIONS = {
     'sin': math.sin,
     'cos': math.cos,
@@ -40,7 +40,7 @@ ALLOWED_FUNCTIONS = {
     'e': math.e,
 }
 
-# ========== Safe Evaluator ==========
+# Safe Evaluator
 
 
 def safe_eval(expr):
@@ -48,34 +48,34 @@ def safe_eval(expr):
         node = ast.parse(expr, mode='eval').body
         return eval_node(node)
     except Exception:
-        return "An Error occured: Invalid expression"
+        return "An Error occured: Invalid expression\n`/help` - Show this help message\n"
 
 
 def eval_node(node):
-    if isinstance(node, ast.Num):  # 3, 4.5
+    if isinstance(node, ast.Num):
         return node.n
-    elif isinstance(node, ast.Constant):  # For Python 3.8+
+    elif isinstance(node, ast.Constant):
         return node.value
-    elif isinstance(node, ast.BinOp):  # a + b
+    elif isinstance(node, ast.BinOp):
         return OPERATORS[type(node.op)](eval_node(node.left), eval_node(node.right))
-    elif isinstance(node, ast.UnaryOp):  # -a
+    elif isinstance(node, ast.UnaryOp):
         return OPERATORS[type(node.op)](eval_node(node.operand))
-    elif isinstance(node, ast.Call):  # function like sin(30)
+    elif isinstance(node, ast.Call):
         func_name = node.func.id
         if func_name in ALLOWED_FUNCTIONS:
             args = [eval_node(arg) for arg in node.args]
             return ALLOWED_FUNCTIONS[func_name](*args)
         else:
-            raise ValueError("Unsupported function")
-    elif isinstance(node, ast.Name):  # e, pi
+            raise ValueError("Unsupported function\n`/help` - Show this help message\n")
+    elif isinstance(node, ast.Name):
         if node.id in ALLOWED_FUNCTIONS:
             return ALLOWED_FUNCTIONS[node.id]
         else:
-            raise ValueError("Unknown constant")
+            raise ValueError("Unknown constant\n`/help` - Show this help message\n")
     else:
-        raise ValueError("Unsupported expression")
+        raise ValueError("Unsupported expression\n`/help` - Show this help message\n")
 
-# ========== Bot Handlers ==========
+# Bot Handlers
 
 # /start command
 
@@ -118,7 +118,7 @@ async def calculate(update: Update, context: ContextTypes.DEFAULT_TYPE):
     result = safe_eval(expr)
     await update.message.reply_text(f"Calculated result: `{result}`", parse_mode="Markdown")
 
-# ========== Run Bot ==========
+# Run Bot
 
 
 def main():
